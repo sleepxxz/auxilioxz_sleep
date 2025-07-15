@@ -1,0 +1,236 @@
+
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Auxílio VIP Sleep</title>
+<style>
+  body {
+    margin: 0;
+    background: #000;
+    color: #fff;
+    font-family: 'Arial', sans-serif;
+    overflow: hidden;
+  }
+
+  canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0;
+  }
+
+  .panel {
+    width: 90%;
+    max-width: 320px;
+    background: rgba(30, 0, 0, 0.85);
+    border: 2px solid #ff1a1a;
+    border-radius: 10px;
+    padding: 20px;
+    margin: auto;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+  }
+
+  h2 {
+    text-align: center;
+    color: #ff4c4c;
+    margin-bottom: 20px;
+    font-size: 22px;
+  }
+
+  .tabs {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #bbb;
+    border-bottom: 2px solid transparent;
+    transition: all 0.3s;
+  }
+
+  .tab.active {
+    color: #ff4c4c;
+    border-bottom: 2px solid #ff4c4c;
+  }
+
+  .content {
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .content.active {
+    display: block;
+  }
+
+  .slider-label {
+    margin-top: 15px;
+    font-size: 14px;
+  }
+
+  .slider {
+    width: 100%;
+    margin: 5px 0 15px 0;
+  }
+
+  .button {
+    background: #ff1a1a;
+    border: none;
+    width: 100%;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    font-size: 16px;
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
+  }
+
+  .button:hover {
+    background: #cc0000;
+    transform: scale(1.02);
+  }
+
+  .button:active {
+    transform: scale(0.98);
+  }
+
+  .info-text {
+    font-size: 14px;
+    color: #ffcccc;
+    margin-top: 10px;
+    line-height: 1.4em;
+  }
+
+  @keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+  }
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+
+<div class="panel">
+  <h2>Auxílio VIP Sleep</h2>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(0)">Assistência de Mira</div>
+    <div class="tab" onclick="switchTab(1)">Info</div>
+  </div>
+
+  <div class="content active">
+    <label class="slider-label">FOV: <span id="fovVal">5</span></label>
+    <input type="range" min="0" max="10" value="5" class="slider" oninput="updateValue(this, 'fovVal')">
+
+    <label class="slider-label">DPI: <span id="dpiVal">5</span></label>
+    <input type="range" min="0" max="10" value="5" class="slider" oninput="updateValue(this, 'dpiVal')">
+
+    <button class="button" id="headshotBtn" onclick="toggleHeadshot()">Forçar Headshot</button>
+    <button class="button" id="auxilioBtn" onclick="activateAuxilio()">Ativar Auxílio</button>
+  </div>
+
+  <div class="content">
+    <div class="info-text">
+      <b>FOV:</b> define a área de alcance da mira automática.<br><br>
+      <b>DPI:</b> adapta a assistência à sua sensibilidade de toque.<br><br>
+      <b>Forçar Headshot:</b> trava a mira na cabeça do inimigo.<br><br>
+      <b>Ativar Auxílio:</b> ativa todas as funções automaticamente.
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById("bg");
+const ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let particles = [];
+for (let i = 0; i < 80; i++) {
+  particles.push({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    vx: (Math.random() - 0.5) * 1.2,
+    vy: (Math.random() - 0.5) * 1.2
+  });
+}
+
+function animate() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles.forEach((p, i) => {
+    p.x += p.vx;
+    p.y += p.vy;
+    if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+    if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 2, 0, 2 * Math.PI);
+    ctx.fillStyle = "#ff1a1a";
+    ctx.fill();
+
+    for (let j = i + 1; j < particles.length; j++) {
+      let q = particles[j];
+      let dx = p.x - q.x;
+      let dy = p.y - q.y;
+      let dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 100) {
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+        ctx.lineTo(q.x, q.y);
+        ctx.strokeStyle = "rgba(255,26,26,0.15)";
+        ctx.stroke();
+      }
+    }
+  });
+  requestAnimationFrame(animate);
+}
+animate();
+
+function updateValue(slider, id) {
+  document.getElementById(id).textContent = slider.value;
+}
+
+function switchTab(index) {
+  document.querySelectorAll(".tab").forEach((el, i) =>
+    el.classList.toggle("active", i === index)
+  );
+  document.querySelectorAll(".content").forEach((el, i) =>
+    el.classList.toggle("active", i === index)
+  );
+}
+
+function toggleHeadshot() {
+  const btn = document.getElementById("headshotBtn");
+  const isActive = btn.classList.toggle("active");
+  btn.textContent = isActive ? "Headshot Ativado ✔" : "Forçar Headshot";
+  btn.style.background = isActive ? "#cc0000" : "#ff1a1a";
+}
+
+function activateAuxilio() {
+  const btn = document.getElementById("auxilioBtn");
+  btn.disabled = true;
+  btn.textContent = "Ativando...";
+  btn.style.background = "#b33c00";
+  setTimeout(() => {
+    btn.textContent = "Auxílio Ativado ✔";
+    btn.style.background = "#b33c00";
+    btn.disabled = false;
+  }, 1500);
+}
+</script>
+</body>
+</html>
